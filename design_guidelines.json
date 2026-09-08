@@ -1,0 +1,80 @@
+{
+  "project_name": "Yuna Punyaja - Portfolio & AI Showcase",
+  "archetype": "Pastel Soft High-Tech (Modern, Feminine, Elegant)",
+  "theme": {
+    "mode": "light",
+    "background_primary": "#FDFBF7",
+    "background_secondary": "#FAF9F6",
+    "text_primary": "#1F2937",
+    "text_secondary": "#4B5563",
+    "text_muted": "#6B7280",
+    "accent_rose": "#FBEBE8",
+    "accent_rose_hover": "#F5DCD7",
+    "accent_lavender": "#EAE7EC",
+    "accent_sage": "#E2E8E4",
+    "accent_champagne": "#F5EBE0",
+    "border_subtle": "#E5E1DA",
+    "card_bg": "#FFFFFF"
+  },
+  "typography": {
+    "font_family_heading": "Cormorant Garamond, Serif, Georgia",
+    "font_family_body": "Plus Jakarta Sans, Inter, sans-serif",
+    "font_family_mono": "Fira Code, JetBrains Mono, monospace",
+    "h1": "text-4xl sm:text-5xl lg:text-6xl font-serif font-semibold tracking-tight text-[#1F2937]",
+    "h2": "text-2xl sm:text-3xl lg:text-4xl font-serif font-medium tracking-tight text-[#1F2937]",
+    "h3": "text-xl sm:text-2xl font-serif font-medium text-[#1F2937]",
+    "body": "text-base leading-relaxed text-[#4B5563]",
+    "subtitle": "text-lg sm:text-xl font-light tracking-wide text-[#6B7280]",
+    "badge_text": "text-xs font-mono uppercase tracking-widest text-[#1F2937]"
+  },
+  "hero_canvas_spec": {
+    "height": "200vh container with sticky 100vh viewport scene",
+    "canvas_type": "HTML5 2D procedural pixel grid portrait with pastel color tinting",
+    "scroll_phases": {
+      "phase_1_text_fade": "Scroll 0.0 -> 0.4: Title & Subtitle text scale down from 1.0 to 0.2 with opacity fade to 0",
+      "phase_2_pixel_explosion": "Scroll 0.2 -> 1.0: Pixel grid portrait particles disperse radially outward with velocity, rotation, and alpha fadeout"
+    },
+    "fallback_controls": "Interactive Replay / Reset explosion button with canvas intensity slider"
+  },
+  "sections": {
+    "section_a_about": {
+      "title": "Who is Yuna",
+      "layout": "Grid 12-cols (5 cols dual-framed tilted photos left, 7 cols rich storytelling text right)",
+      "photo_frames": "Dual framed cards with offset rotation (-3deg and 4deg), soft champagne shadow, pastel border, hover straighten animation",
+      "highlights": ["Technical Implementation Manager at scale", "AI Engineer specializing in Computer Vision & ML pipelines", "Cross-functional bridge between Engineering, Product & Client Stakeholders"]
+    },
+    "section_b_experience_skills": {
+      "title": "Experience & Capability Matrix",
+      "layout": "Horizontal Stacking Layer / Tabbed view with smooth slide transitions",
+      "timeline": "Horizontal 4-node milestone timeline (Enterprise AI Deployment, Implementation Manager Lead, CV/MediaPipe Systems, Full Stack & Data Architecture) with clickable modal detail expansion",
+      "skills": ["Python", "MediaPipe", "OpenCV", "Scikit-Learn", "Next.js", "REST APIs", "Oracle DBs", "Docker", "PyTorch"],
+      "languages_card": ["English (Native / Full Professional)", "French (Bilingual / Professional)"]
+    },
+    "section_c_contact": {
+      "title": "Let's Connect & Support",
+      "layout": "Dual column card grid (Contact Form left, Buy Me a Coffee CTA & Social Nodes right)",
+      "contact_form": "Shadcn Form primitives + custom pastel inputs, submit handler with Sonner toast notification",
+      "buy_me_coffee": "Interactive coffee widget with cup selection (Espresso $3, Matcha $5, Special Roast $10), live tip calculator, and custom message field"
+    }
+  },
+  "image_urls": {
+    "portrait_primary": "https://images.unsplash.com/photo-1762341124796-530c0085f7d8?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHwzfHxhc2lhbiUyMGZlbWFsZSUyMHRlY2glMjBlbmdpbmVlciUyMHBvcnRyYWl0JTIwZWxlZ2FudCUyMHByb2Zlc3Npb25hbHxlbnwwfHx8fDE3ODg4MTQ1Mjh8MA&ixlib=rb-4.1.0&q=85",
+    "portrait_secondary": "https://images.unsplash.com/photo-1767164057919-61acae4612c3?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHw0fHxhc2lhbiUyMGZlbWFsZSUyMHRlY2glMjBlbmdpbmVlciUyMHBvcnRyYWl0JTIwZWxlZ2FudCUyMHByb2Zlc3Npb25hbHxlbnwwfHx8fDE3ODg4MTQ1Mjh8MA&ixlib=rb-4.1.0&q=85",
+    "ambient_background": "https://images.unsplash.com/photo-1774492796333-14c4df6a6fca?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzB8MHwxfHNlYXJjaHxffGFzaWFuJTIwZmVtYWxlJTIwdGVjaCUyMGVuZ2luZWVyJTIwcG9ydHJhaXQlMjBlbGVnYW50JTIwcHJvZmVzc2lvbmFsfGVufDB8fHx8MTc4ODgxNDUyOHww&ixlib=rb-4.1.0&q=85"
+  },
+  "instructions_to_main_agent": [
+    "Ensure all interactive elements have data-testid attributes (e.g. data-testid='contact-submit-btn', data-testid='timeline-node-0', data-testid='coffee-tip-5').",
+    "Implement the sticky hero canvas: 200vh parent div with a sticky top-0 h-screen container holding the canvas and overlay text.",
+    "Calculate scroll progress within hero [0, 1] to drive text scale down & opacity fade out (0-0.4), and canvas particle explosion (0.2-1.0).",
+    "Use Framer Motion or smooth state transitions for the horizontal section stacking / tabs.",
+    "Style all cards with delicate pastel borders (#E5E1DA), soft multi-layered ambient shadows, and rich backdrop blur.",
+    "Add interactive toast notifications using Sonner when submitting contact forms or sending virtual coffee tips."
+  ],
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "No dark default templates. Embrace the warm off-white cream (#FDFBF7) and rose/lavender pastel aesthetic.",
+    "Never use pure black #000000; use rich deep slate #1F2937.",
+    "Avoid Inter for main headings; use Cormorant Garamond / Serif typography for headlines.",
+    "Include data-testid on every button, tab, card, input, and modal trigger.",
+    "All forms must use customized Shadcn/UI or controlled input components with high contrast hover/focus states."
+  ]
+}
