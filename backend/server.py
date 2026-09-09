@@ -6,8 +6,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import List
 import uuid
-
-from a2wsgi import WSGIMiddleware
+from a2wsgi import ASGIMiddleware
 from dotenv import load_dotenv
 from fastapi import APIRouter, FastAPI, HTTPException
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -32,8 +31,8 @@ def ensure_csv_header():
 ensure_csv_header()
 
 # MongoDB connection
-mongo_url = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
-client = AsyncIOMotorClient(mongo_url)
+mongo_url = os.environ.get("MONGO_URL", "mongodb://localhost:2017")
+client = AsyncIOMotorClient(mongo_url, serverSelectionTimeoutMS=2000)
 db = client[os.environ.get("DB_NAME", "test_database")]
 
 
@@ -156,4 +155,4 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # WSGI wrapper for PythonAnywhere
-wsgi_app = WSGIMiddleware(app)
+wsgi_app = ASGIMiddleware(app)
