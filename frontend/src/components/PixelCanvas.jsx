@@ -1,7 +1,9 @@
 import { useEffect, useRef } from "react";
 
 const GRID = 36;
-const PALETTE = ["#F5DCD7", "#FBEBE8", "#EAE7EC", "#E2E8E4", "#F5EBE0", "#E8D5CF", "#D9CFDD", "#F3E4DE"];
+
+// Fallback palette in case image loading fails or hasn't finished
+const FALLBACK_PALETTE = ["#F5DCD7", "#FBEBE8", "#EAE7EC", "#E2E8E4", "#F5EBE0", "#E8D5CF", "#D9CFDD", "#F3E4DE"];
 
 // Deterministic pseudo-random
 const rand = (seed) => {
@@ -9,41 +11,56 @@ const rand = (seed) => {
   return x - Math.floor(x);
 };
 
-function buildPixels() {
+// Build pixels by sampling an Image element
+function buildPixelsFromImage(img) {
   const pixels = [];
-  const cx = GRID / 2;
-  const headR = GRID * 0.24;
-  const headCY = GRID * 0.36;
-  const shoulderCY = GRID * 0.88;
-  const shoulderRX = GRID * 0.34;
-  const shoulderRY = GRID * 0.24;
+  const offscreen = document.createElement("canvas");
+  offscreen.width = GRID;
+  offscreen.height = GRID;
+  const offCtx = offscreen.getContext("2d");
+
+  if (img) {
+    // Draw and cover image onto 36x36 grid
+    const scale = Math.max(GRID / img.width, GRID / img.height);
+    const x = (GRID - img.width * scale) / 2;
+    const y = (GRID - img.height * scale) / 2;
+    offCtx.drawImage(img, x, y, img.width * scale, img.height * scale);
+  }
+
+  const imgData = img ? offCtx.getImageData(0, 0, GRID, GRID).data : null;
 
   for (let y = 0; y < GRID; y++) {
     for (let x = 0; x < GRID; x++) {
-      const dx = x + 0.5 - cx;
-      const dyHead = y + 0.5 - headCY;
-      const inHead = (dx * dx) / (headR * headR) + (dyHead * dyHead) / (headR * headR * 1.25) <= 1;
-      const dyS = y + 0.5 - shoulderCY;
-      const inShoulders =
-        y + 0.5 > GRID * 0.62 &&
-        (dx * dx) / (shoulderRX * shoulderRX) + (dyS * dyS) / (shoulderRY * shoulderRY) <= 1;
-      const inNeck = Math.abs(dx) < GRID * 0.075 && y > GRID * 0.52 && y < GRID * 0.66;
-
-      if (inHead || inShoulders || inNeck) {
+      let color;
+      if (imgData) {
+        const idx = (y * GRID + x) * 4;
+        const r = imgData[idx];
+        const g = imgData[idx + 1];
+        const b = imgData[idx + 2];
+        const a = imgData[idx + 3] / 255;
+        if (a < 0.1) continue; // Skip transparent background areas if any
+        color = `rgb(${r}, ${g}, ${b})`;
+      } else {
         const seed = x * 73 + y * 149;
-        const angle = Math.atan2(y + 0.5 - GRID * 0.5, dx);
-        const speed = 0.35 + rand(seed) * 0.85;
-        pixels.push({
-          gx: x,
-          gy: y,
-          color: PALETTE[Math.floor(rand(seed + 1) * PALETTE.length)],
-          vx: Math.cos(angle) * speed + (rand(seed + 2) - 0.5) * 0.4,
-          vy: Math.sin(angle) * speed + (rand(seed + 3) - 0.5) * 0.4 - 0.12,
-          delay: rand(seed + 4) * 0.25,
-          size: 0.85 + rand(seed + 5) * 0.3,
-          spin: (rand(seed + 6) - 0.5) * 2.4,
-        });
+        color = FALLBACK_PALETTE[Math.floor(rand(seed + 1) * FALLBACK_PALETTE.length)];
       }
+
+      const seed = x * 73 + y * 149;
+      const dx = x + 0.5 - GRID / 2;
+      const dy = y + 0.5 - GRID / 2;
+      const angle = Math.atan2(dy, dx);
+      const speed = 0.35 + rand(seed) * 0.85;
+
+      pixels.push({
+        gx: x,
+        gy: y,
+        color,
+        vx: Math.cos(angle) * speed + (rand(seed + 2) - 0.5) * 0.4,
+        vy: Math.sin(angle) * speed + (rand(seed + 3) - 0.5) * 0.4 - 0.12,
+        delay: rand(seed + 4) * 0.25,
+        size: 0.88 + rand(seed + 5) * 0.25,
+        spin: (rand(seed + 6) - 0.5) * 2.4,
+      });
     }
   }
   return pixels;
@@ -63,10 +80,21 @@ export default function PixelCanvas({ progress }) {
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
-    pixelsRef.current = buildPixels();
+
+    // Initialize with fallback pixels immediately
+    pixelsRef.current = buildPixelsFromImage(null);
+
+    // Load actual portrait photo and re-sample
+    const img = new Image();
+    img.src = "/yuna-portrait-1.jpg";
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      pixelsRef.current = buildPixelsFromImage(img);
+    };
 
     const resize = () => {
       const parent = canvas.parentElement;
+      if (!parent) return;
       const size = Math.min(parent.clientWidth * 0.86, parent.clientHeight * 0.92, 560);
       const dpr = Math.min(window.devicePixelRatio || 1, 2);
       canvas.width = size * dpr;
@@ -85,6 +113,8 @@ export default function PixelCanvas({ progress }) {
       const p = progressRef.current;
 
       ctx.clearRect(0, 0, w, h);
+
+      if (!pixelsRef.current) return;
 
       const explode = Math.min(Math.max((p - 0.2) / 0.8, 0), 1);
       const ease = explode * explode * (3 - 2 * explode);
@@ -105,7 +135,7 @@ export default function PixelCanvas({ progress }) {
         ctx.fillStyle = px.color;
         const half = size / 2;
         ctx.beginPath();
-        ctx.roundRect(-half, -half, size, size, size * 0.22);
+        ctx.roundRect(-half, -half, size, size, size * 0.18);
         ctx.fill();
         ctx.restore();
       }
@@ -115,7 +145,7 @@ export default function PixelCanvas({ progress }) {
 
     rafRef.current = requestAnimationFrame(render);
     return () => {
-      cancelAnimationFrame(rafRef.current);
+      if (rafRef.current) cancelAnimationFrame(rafRef.current);
       window.removeEventListener("resize", resize);
     };
   }, []);

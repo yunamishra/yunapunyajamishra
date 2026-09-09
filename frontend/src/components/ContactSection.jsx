@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { Coffee, Send, Heart } from "lucide-react";
+import { Coffee, Send, Heart, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 const COFFEE_OPTIONS = [
+  { id: "dark_roast", label: "Dark Roast", price: 1 },
   { id: "espresso", label: "Espresso", price: 3 },
   { id: "matcha", label: "Matcha", price: 5 },
-  { id: "roast", label: "Special Roast", price: 10 },
 ];
 
 const inputClasses =
@@ -14,20 +14,46 @@ const inputClasses =
 
 export default function ContactSection() {
   const [form, setForm] = useState({ name: "", email: "", message: "" });
-  const [coffee, setCoffee] = useState("matcha");
+  const [coffee, setCoffee] = useState("dark_roast");
   const [coffeeMsg, setCoffeeMsg] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const selected = COFFEE_OPTIONS.find((c) => c.id === coffee);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    toast.success(`Thanks ${form.name || "friend"} — your message is on its way to Yuna.`);
-    setForm({ name: "", email: "", message: "" });
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to send message.");
+      }
+
+      toast.success(`Thanks ${form.name || "friend"} — your message was logged & sent!`);
+      setForm({ name: "", email: "", message: "" });
+    } catch (err) {
+      toast.error("Could not record message. Please try again later.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleCoffee = () => {
-    toast.success(`A ${selected.label} ($${selected.price}) for Yuna — thank you for the support!`, {
-      icon: <Heart className="h-4 w-4" />,
+    const username = "yunapunyajamishra";
+    const amount = selected.price;
+    const note = encodeURIComponent(coffeeMsg);
+    
+    const paymentUrl = `https://buymeacoffee.com/${username}?amount=${amount}&note=${note}`;
+    window.open(paymentUrl, "_blank", "noopener,noreferrer");
+    
+    toast.success(`Redirecting to Buy Me a Coffee for a ${selected.label} ($${selected.price}) — thank you!`, {
+      icon: <Heart className="h-4 w-4 text-pink-500" />,
     });
     setCoffeeMsg("");
   };
@@ -39,8 +65,7 @@ export default function ContactSection() {
         Let's Connect
       </h2>
       <p className="mt-4 max-w-xl text-base leading-relaxed text-[#4B5563]">
-        Whether it's an enterprise AI implementation, a computer vision collaboration, or just a
-        hello — my inbox is open.
+        Whether it’s exploring AI risk and governance frameworks, strategizing complex client integrations, or simply discussing where technology is heading next — my inbox is always open.
       </p>
 
       <div className="mt-10 grid grid-cols-1 gap-8 md:grid-cols-2">
@@ -83,7 +108,7 @@ export default function ContactSection() {
               rows={5}
               data-testid="contact-message-input"
               className={`${inputClasses} resize-none`}
-              placeholder="Tell me about your project..."
+              placeholder="Tell me about your project or ideas..."
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}
               required
@@ -93,11 +118,16 @@ export default function ContactSection() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             type="submit"
+            disabled={isSubmitting}
             data-testid="contact-submit-btn"
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1F2937] px-6 py-3.5 text-sm font-medium text-[#FDFBF7] shadow-[0_12px_30px_rgba(31,41,55,0.25)] transition-colors duration-300 hover:bg-[#374151]"
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#1F2937] px-6 py-3.5 text-sm font-medium text-[#FDFBF7] shadow-[0_12px_30px_rgba(31,41,55,0.25)] transition-colors duration-300 hover:bg-[#374151] disabled:opacity-50"
           >
-            <Send className="h-4 w-4" />
-            Send Message
+            {isSubmitting ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
+            {isSubmitting ? "Saving..." : "Send Message"}
           </motion.button>
         </form>
 
@@ -111,13 +141,14 @@ export default function ContactSection() {
           </span>
           <h3 className="mt-5 font-serif text-2xl font-medium text-[#1F2937]">Buy Me a Coffee</h3>
           <p className="mt-2 text-sm leading-relaxed text-[#4B5563]">
-            Enjoying my work? Fuel the next late-night model training session.
+            Enjoying my work? Fuel the next late-night model training session &amp; my coffee obsession ☕
           </p>
 
           <div className="mt-6 grid grid-cols-3 gap-2">
             {COFFEE_OPTIONS.map((opt) => (
               <button
                 key={opt.id}
+                type="button"
                 onClick={() => setCoffee(opt.id)}
                 data-testid={`coffee-option-${opt.id}`}
                 className={`rounded-xl border px-2 py-3 text-center transition-all duration-200 ${
@@ -144,6 +175,7 @@ export default function ContactSection() {
             whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.97 }}
             onClick={handleCoffee}
+            type="button"
             data-testid="coffee-send-btn"
             className="mt-4 flex items-center justify-center gap-2 rounded-xl bg-[#1F2937] px-6 py-3.5 text-sm font-medium text-[#FDFBF7] transition-colors duration-300 hover:bg-[#374151]"
           >
