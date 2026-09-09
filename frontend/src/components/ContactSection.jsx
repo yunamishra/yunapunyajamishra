@@ -35,10 +35,10 @@ export default function ContactSection() {
         throw new Error("Failed to send message.");
       }
 
-      toast.success(`Thanks ${form.name || "friend"} — your message was logged & sent!`);
+      toast.success(`Thanks ${form.name || "friend"} — your message was emailed!`);
       setForm({ name: "", email: "", message: "" });
     } catch (err) {
-      toast.error("Could not record message. Please try again later.");
+      toast.error("Could not send email. Please try again later.");
     } finally {
       setIsSubmitting(false);
     }
@@ -127,7 +127,7 @@ export default function ContactSection() {
             ) : (
               <Send className="h-4 w-4" />
             )}
-            {isSubmitting ? "Saving..." : "Send Message"}
+            {isSubmitting ? "Sending..." : "Send Message"}
           </motion.button>
         </form>
 
